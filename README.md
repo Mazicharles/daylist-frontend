@@ -26,4 +26,16 @@ Requests go directly to that backend, so configure its `CORS_ORIGINS` to include
 npm run build
 ```
 
-The output is in `dist/`, which is ignored by Git. No deployment is configured or required. Commit `package-lock.json` so `npm ci` installs reproducible dependencies.
+The output is in `dist/`, which is ignored by Git. Commit `package-lock.json` so `npm ci` installs reproducible dependencies.
+
+## Vercel deployment (after the backend)
+
+1. First deploy `daylist-backend` using its README and copy the backend's actual production URL.
+2. In Vercel, select **Add New → Project** and import `Mazicharles/daylist-frontend`, production branch `main`.
+3. Use repository root `./` and framework **Vite**. `vercel.json` specifies install `npm ci`, build `npm run build`, and output `dist`.
+4. Add production environment variable `VITE_API_URL` with the actual backend HTTPS origin, e.g. `https://daylist-backend.vercel.app`. Do not include `/api/tasks`. The example domain is not guaranteed to be available; use the URL Vercel assigned to your backend.
+5. Deploy and copy the actual frontend production URL. Ensure production is public under **Settings → Deployment Protection** if anyone should be able to open it.
+6. In the backend project, set production `CORS_ORIGINS` to this exact frontend origin and redeploy the backend if the origin changed. No frontend rebuild is needed just for a backend CORS change.
+7. Open the frontend public URL and test creating, editing, completing, deleting, and dragging tasks into a new order. If you change `VITE_API_URL` later, redeploy the frontend because Vite embeds it at build time.
+
+The UI and task interactions are unchanged. Local development still defaults to port 8000. The Vercel backend uses temporary SQLite for this demo: tasks can reset on cold starts and are not shared across separate serverless instances. No deployment is performed by adding this configuration.
